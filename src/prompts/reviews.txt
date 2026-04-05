@@ -1,0 +1,3 @@
+Resume el sentimiento general y la dificultad de estas reseñas en 20 palabras:
+
+{reseñas}
