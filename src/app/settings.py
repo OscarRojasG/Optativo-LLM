@@ -33,6 +33,9 @@ REVIEWS_FOLDER = DATA_FOLDER / "reviews"
 
 PROMPTS_FOLDER = PROJECT_ROOT / "prompts"
 
+RAW_REVIEWS_FILEPATH = DATA_FOLDER / "raw_reviews.json"
+CLEAN_REVIEWS_FILEPATH = DATA_FOLDER / "clean_reviews.json"
+
 RAW_METADATA_FILEPATH = DATA_FOLDER / "raw_metadata.json"
 CLEAN_METADATA_FILEPATH = DATA_FOLDER / "clean_metadata.json"
 

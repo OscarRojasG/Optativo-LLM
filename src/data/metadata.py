@@ -33,7 +33,8 @@ def fetch_batch(last_id):
             involved_companies.developer,
             age_ratings.rating,
             external_games.external_game_source, 
-            external_games.url;
+            external_games.url,
+            external_games.uid;
         where id > {last_id} 
             & game_type = 0 
             & summary != n 
@@ -64,7 +65,7 @@ def save_clean_metadata(data):
 def load_clean_metadata():
     return utils.load_from_json(CLEAN_METADATA_FILEPATH)
 
-def download_data():
+def download_metadata():
     """Lee el archivo de metadata y continúa desde el último ID."""
     all_games = load_raw_metadata()
     
