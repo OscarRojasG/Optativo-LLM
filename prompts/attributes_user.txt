@@ -1,0 +1,7 @@
+TAREA ACTUAL:
+Ahora, genera el perfil para el siguiente juego:
+
+Nombre: {game_name}
+
+Reseñas:
+{reviews}

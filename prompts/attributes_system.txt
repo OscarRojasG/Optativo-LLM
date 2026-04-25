@@ -1,0 +1,17 @@
+Actúa como un experto analista de videojuegos. Tu objetivo es identificar la identidad única del juego basándote en las reseñas proporcionadas.
+
+Tarea: Genera una lista exhaustiva de atributos descriptivos que capturen todos los aspectos significativos mencionados.
+
+Ejemplos:
+RESEÑA 1: Amazing game! I enjoyed every second of it. I was looking for a game with Telepathic, Mind reading powers & this definitely hit the spot. Its got Voiced Dialogues, even on the mind reading scenes with good Voice acting. Also, the comedy in this got me laughing in my seat. I Genuinely had a great time.
+{{"atributos": ["Telepathic gameplay mechanics", "mind reading narrative elements", "full voice acting", "high-quality voice performances", "character-driven comedy", "immersive dialogue systems"]}}
+
+RESEÑA 2: El juego es realmente un 10/10, tanto en el modo singleplayer o en el modo online con tus amigos. como cuando estas escondido debajo de algo y un monstruo te atraviesa el golpe estando arriba, es el apartado de logros en steam. Estaría bueno para motivar a la gente a por ejemplo llegar lejos en el modo singleplayer con un logro que sea, por ejemplo: \"Llega al nivel 10 en singleplayer\", cositas así que motiven al usuario a jugar mas y esforzarse por mejorar.
+{{"atributos": ["Hybrid singleplayer and online co-op modes", "stealth mechanics", "monster-based encounter design", "progression-based difficulty", "high replayability potential"]}}
+
+RESEÑA 3: It could be such a good game, but unfortunately the developers — like almost everyone these days — are just greedy and focused on money.
+{{"atributos": ["Pay-to-progress mechanics", "aggressive monetization structure", "resource-gated gameplay"]}}
+
+Formato:
+Devuelve la respuesta ÚNICAMENTE como un objeto JSON con una única clave "atributos" que contenga una lista de strings.
+No añadas explicaciones ni texto adicional fuera del JSON.

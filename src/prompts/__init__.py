@@ -1,30 +1,31 @@
-from google import genai
-from google.genai import types
-from app.settings import GEMINI_API_KEY, SYSTEM_PROMPTS_FOLDER, USER_PROMPTS_FOLDER
+from typing import Optional
+from langchain.chat_models import BaseChatModel
+from langchain.embeddings import Embeddings
+from langchain_core.messages import SystemMessage, HumanMessage
+from langchain_core.output_parsers import BaseOutputParser, StrOutputParser, JsonOutputParser
+from app.settings import PROMPTS_FOLDER
 
 
-# The client gets the API key from the environment variable `GEMINI_API_KEY`.
-client = genai.Client(api_key=GEMINI_API_KEY)
+def get_response(model: BaseChatModel, system_prompt: Optional[str], user_prompt: str, output_parser: BaseOutputParser):
+    messages = []
 
-def send_prompt(user_prompt: str, system_prompt: str, model: str):
-    args = {
-        "model": model,
-        "contents": user_prompt
-    }
     if system_prompt:
-        args["config"] = types.GenerateContentConfig(
-            system_instruction = system_prompt
-        )
+        messages.append(SystemMessage(content=system_prompt))
+    
+    messages.append(HumanMessage(content=user_prompt))
 
-    response = client.models.generate_content(**args)
-    return response.text
+    chain = model | output_parser
+    return chain.invoke(messages)
 
-def read_system_prompt(filename: str):
-    return _read_prompt(f"{SYSTEM_PROMPTS_FOLDER}/{filename}")
+def get_text_response(model: BaseChatModel, system_prompt: str, user_prompt: str):
+    return get_response(model, system_prompt, user_prompt, StrOutputParser())
 
-def read_user_prompt(filename: str):
-    return _read_prompt(f"{USER_PROMPTS_FOLDER}/{filename}")
+def get_json_response(model: BaseChatModel, system_prompt: str, user_prompt: str):
+    return get_response(model, system_prompt, user_prompt, JsonOutputParser())
 
-def _read_prompt(filepath: str):
-    with open(filepath, "r") as f:
+def get_embedding(model: Embeddings, input: str):
+    return model.embed_query(input)
+
+def read_prompt(filepath: str):
+    with open(PROMPTS_FOLDER / filepath, "r") as f:
         return f.read()

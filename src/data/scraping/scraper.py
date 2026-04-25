@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from app import utils
 from app.utils import RequestError
-from embeddings import igdb_metadata
+from data import metadata
 from app.settings import REVIEWS_FOLDER
 
 class Scraper(ABC):
@@ -53,7 +53,7 @@ class Scraper(ABC):
 
     @staticmethod
     def get_pending_games(from_id):
-        games = igdb_metadata.load_from_json()
+        games = metadata.load_from_json()
         pending_games = []
 
         for game in games:
@@ -106,6 +106,7 @@ class Scraper(ABC):
 
         for igdb_id, reviews in all_reviews.items():
             best_reviews = cls.get_best_reviews(reviews)
+            best_reviews = [review.replace('\n', ' ').replace('\r', '') for review in best_reviews]
             if len(best_reviews) == 0: continue
             filtered_reviews[igdb_id] = best_reviews
 

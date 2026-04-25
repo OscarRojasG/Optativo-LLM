@@ -1,0 +1,17 @@
+# Technical Metadata
+
+Name: {name}
+Era {era},
+Genres: {genres},
+Themes: {themes},
+Perspective: {perspective},
+VR: {is_vr},
+Multiplayer: {is_multiplayer},
+Challenge level: {challenge_level},
+Critic score: {critic_score},
+Summary: {summary}
+Storyline: {storyline}
+
+# Attributes
+
+{attributes}

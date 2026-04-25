@@ -123,31 +123,31 @@ def get_clean_metadata(game_data):
     # Buscamos géneros o temas que suelen implicar dificultad alta
     hard_keywords = ['Roguelike', 'Soulslike', 'Tactical', 'Strategy', 'Fighting', 'Simulator']
     challenge_tags = [tag for tag in hard_keywords if tag in genres or tag in themes]
-    challenge_level = "Alto / Técnico" if challenge_tags else "Estándar / Accesible"
+    challenge_level = "High / Technical" if challenge_tags else "Standard / Accessible"
     
     # 5. Clasificación por Era (Basado en el año de lanzamiento)
     release_ts = game_data.get('first_release_date')
     if release_ts:
         year = datetime.fromtimestamp(release_ts).year
         if year < 1995: era = "Retro (8/16-bit)"
-        elif 1995 <= year <= 2005: era = "Clásica (3D Temprano)"
-        elif 2006 <= year <= 2015: era = "Moderna"
-        else: era = "Contemporánea / Next-Gen"
+        elif 1995 <= year <= 2005: era = "Classic (Early 3D)"
+        elif 2006 <= year <= 2015: era = "Modern"
+        else: era = "Contemporary / Next-Gen"
     else:
-        era = "Desconocida"
+        era = "Unknown"
 
     return {
         "name": game_data.get('name'),
         "era": era,
         "genres": ", ".join(genres),
         "themes": ", ".join(themes),
-        "perspective": perspectives[0] if perspectives else "No especificada",
-        "is_vr": "Sí" if is_vr else "No",
-        "is_multiplayer": "Sí" if is_multiplayer else "No",
+        "perspective": perspectives[0] if perspectives else "Not specified",
+        "is_vr": "Yes" if is_vr else "No",
+        "is_multiplayer": "Yes" if is_multiplayer else "No",
         "challenge_level": challenge_level,
         "critic_score": round(game_data.get('total_rating', 0)),
-        "summary": game_data.get('summary', 'No disponible'),
-        "storyline": game_data.get('storyline', 'No disponible')
+        "summary": game_data.get('summary', 'Not available').replace('\n', ' ').replace('\r', ''),
+        "storyline": game_data.get('storyline', 'Not available').replace('\n', ' ').replace('\r', '')
     }
 
 def generate_clean_metadata():

@@ -1,6 +1,6 @@
 import requests
 from app.utils import RequestError
-from embeddings.scraping.scraper import Scraper
+from data.scraping.scraper import Scraper
 
 class SteamScraper(Scraper):
     @staticmethod
@@ -30,7 +30,7 @@ class SteamScraper(Scraper):
         
         for r in raw_reviews:
             review_map = {
-                "text": r.get("review"),
+                "text": r.get("review").replace('\n', ' ').replace('\r', ''),
                 "is_positive": r.get("voted_up"),
                 "score": r.get("weighted_vote_score"),
                 "playtime_hours": round(r.get("author").get("playtime_at_review", 0) / 60),
