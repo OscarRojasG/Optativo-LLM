@@ -1,14 +1,12 @@
 from data.metadata import load_clean_metadata
-from data.scraping import SteamScraper
+from data.reviews import load_clean_reviews
 from prompts import get_json_response, read_prompt
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from functools import partial
 from app.settings import DATA_FOLDER
 from app.utils import save_to_json, load_from_json
 
 def get_games(with_reviews: bool):
     games = load_clean_metadata()
-    reviewed_games = SteamScraper.load_clean_reviews()
+    reviewed_games = load_clean_reviews()
 
     filtered_games = []
     for id, game in games.items():
@@ -36,23 +34,6 @@ def format_user_prompt_metadata(user_prompt, game):
         storyline = game['storyline'].replace("\n", " "),
         reviews = "\n".join(game['reviews'])
     )
-
-def load_clean_reviews():
-    return SteamScraper.load_clean_reviews()
-
-def generate_game_attributes2(game_name, reviews, model, system_prompt, user_prompt):
-    reviews_text = "\n".join([
-        f"{i+1}. {review}" 
-        for i, review in enumerate(reviews) 
-        if review.strip()
-    ])
-    user_prompt = user_prompt.format(game_name=game_name, reviews=reviews_text)
-
-    try:
-        return get_json_response(model, system_prompt, user_prompt)
-    except:
-        print(f"Error procesando atributos para: {game_name}")
-        return None
     
 def generate_game_attributes(game_id, reviews, model, attr_system, attr_user, agg_system, agg_user):
     attributes = []
@@ -69,7 +50,8 @@ def generate_game_attributes(game_id, reviews, model, attr_system, attr_user, ag
     agg_user_prompt = agg_user.format(attributes="\n".join(attributes))
     try:
         return get_json_response(model, agg_system, agg_user_prompt)
-    except:
+    except Exception as e:
+        print(e)
         print(f"Error generando lista final de atributos para ID: {game_id}")    
 
 # Genera diccionario de juegos con atributos a partir de las reseñas
@@ -112,6 +94,9 @@ def generate_attributes(model):
         if i % 5 == 0: # Guardar cada 5 juegos
             print("Guardando...")
             save_to_json(DATA_FOLDER / "attributes.json", attributes)
+    
+    save_to_json(DATA_FOLDER / "attributes.json", attributes)
+    print("✅ Finalizado.")
 
 # Carga diccionario de juegos con sus atributos
 def load_attributes():

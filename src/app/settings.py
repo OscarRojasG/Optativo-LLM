@@ -26,7 +26,7 @@ IGDB_TOKEN = get_igdb_token(IGDB_CLIENT_ID, IGDB_CLIENT_SECRET)
 
 
 # RUTAS
-PROJECT_ROOT = Path.cwd().parent
+PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 DATA_FOLDER = PROJECT_ROOT / "data"
 REVIEWS_FOLDER = DATA_FOLDER / "reviews"
