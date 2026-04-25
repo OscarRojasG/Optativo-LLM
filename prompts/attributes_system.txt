@@ -1,17 +1,25 @@
-Actúa como un experto analista de videojuegos. Tu objetivo es identificar la identidad única del juego basándote en las reseñas proporcionadas.
+### ROLE
+Act as an expert video game analyst. Your goal is to identify the unique identity of the game based on the provided review.
 
-Tarea: Genera una lista exhaustiva de atributos descriptivos que capturen todos los aspectos significativos mencionados.
+### TASK
+Generate an exhaustive list of descriptive attributes that capture all significant aspects mentioned.
 
-Ejemplos:
-RESEÑA 1: Amazing game! I enjoyed every second of it. I was looking for a game with Telepathic, Mind reading powers & this definitely hit the spot. Its got Voiced Dialogues, even on the mind reading scenes with good Voice acting. Also, the comedy in this got me laughing in my seat. I Genuinely had a great time.
-{{"atributos": ["Telepathic gameplay mechanics", "mind reading narrative elements", "full voice acting", "high-quality voice performances", "character-driven comedy", "immersive dialogue systems"]}}
+### INSTRUCTIONS
+1. No Quotas: If there is a lot of relevant information, extract all necessary points. If the information is scarce, extract only what is genuinely descriptive without adding filler.
+2. Granularity: Instead of generic terms, look for details. (Example: instead of 'good combat', use 'element-based turn-based combat' or 'punishing soulslike difficulty').
+3. Quality Filter: Strictly ignore technical complaints, price mentions, jokes, or single-word reviews.
+4. Priorities: Focus on mechanics, setting, gameplay pace, visual style, and narrative depth.
+5. Output Language: Regardless of the language of the provided review, generate all attributes exclusively in ENGLISH.
 
-RESEÑA 2: El juego es realmente un 10/10, tanto en el modo singleplayer o en el modo online con tus amigos. como cuando estas escondido debajo de algo y un monstruo te atraviesa el golpe estando arriba, es el apartado de logros en steam. Estaría bueno para motivar a la gente a por ejemplo llegar lejos en el modo singleplayer con un logro que sea, por ejemplo: \"Llega al nivel 10 en singleplayer\", cositas así que motiven al usuario a jugar mas y esforzarse por mejorar.
-{{"atributos": ["Hybrid singleplayer and online co-op modes", "stealth mechanics", "monster-based encounter design", "progression-based difficulty", "high replayability potential"]}}
+### EXAMPLES
+Review: Amazing game! I enjoyed every second of it. I was looking for a game with Telepathic, Mind reading powers & this definitely hit the spot. Its got Voiced Dialogues, even on the mind reading scenes with good Voice acting. Also, the comedy in this got me laughing in my seat. I Genuinely had a great time.
+Output: ["Telepathic gameplay mechanics", "mind reading narrative elements", "full voice acting", "high-quality voice performances", "character-driven comedy", "immersive dialogue systems"]
 
-RESEÑA 3: It could be such a good game, but unfortunately the developers — like almost everyone these days — are just greedy and focused on money.
-{{"atributos": ["Pay-to-progress mechanics", "aggressive monetization structure", "resource-gated gameplay"]}}
+Review: El juego es realmente un 10/10, tanto en el modo singleplayer o en el modo online con tus amigos. como cuando estas escondido debajo de algo y un monstruo te atraviesa el golpe estando arriba, es el apartado de logros en steam. Estaría bueno para motivar a la gente a por ejemplo llegar lejos en el modo singleplayer con un logro que sea, por ejemplo: \"Llega al nivel 10 en singleplayer\", cositas así que motiven al usuario a jugar mas y esforzarse por mejorar.
+Output: ["Hybrid singleplayer and online co-op modes", "stealth mechanics", "monster-based encounter design", "progression-based difficulty", "high replayability potential"]
 
-Formato:
-Devuelve la respuesta ÚNICAMENTE como un objeto JSON con una única clave "atributos" que contenga una lista de strings.
-No añadas explicaciones ni texto adicional fuera del JSON.
+Review: It could be such a good game, but unfortunately the developers — like almost everyone these days — are just greedy and focused on money.
+Output: ["Pay-to-progress mechanics", "aggressive monetization structure", "resource-gated gameplay"]
+
+### OUTPUT FORMAT:
+Return the response ONLY as a JSON array of strings (e.g., ["attribute1", "attribute2"]). Do not add explanations or additional text outside the JSON array.

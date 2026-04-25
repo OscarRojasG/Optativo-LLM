@@ -1,7 +1,7 @@
 from data.metadata import load_clean_metadata
 from data.scraping import SteamScraper
 from prompts import get_json_response, read_prompt
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import partial
 from app.settings import DATA_FOLDER
 from app.utils import save_to_json, load_from_json
@@ -40,7 +40,7 @@ def format_user_prompt_metadata(user_prompt, game):
 def load_clean_reviews():
     return SteamScraper.load_clean_reviews()
 
-def generate_game_attributes(game_name, reviews, model, system_prompt, user_prompt):
+def generate_game_attributes2(game_name, reviews, model, system_prompt, user_prompt):
     reviews_text = "\n".join([
         f"{i+1}. {review}" 
         for i, review in enumerate(reviews) 
@@ -53,39 +53,69 @@ def generate_game_attributes(game_name, reviews, model, system_prompt, user_prom
     except:
         print(f"Error procesando atributos para: {game_name}")
         return None
+    
+def generate_game_attributes(game_id, reviews, model, attr_system, attr_user, agg_system, agg_user):
+    attributes = []
+
+    for i, review in enumerate(reviews):
+        attr_user_prompt = attr_user.format(review=review)
+
+        try:
+            attr = get_json_response(model, attr_system, attr_user_prompt)
+            attributes.extend(attr)
+        except:
+            print(f"Error procesando atributos para ID: {game_id} (Reseña {i+1})")
+
+    agg_user_prompt = agg_user.format(attributes="\n".join(attributes))
+    try:
+        return get_json_response(model, agg_system, agg_user_prompt)
+    except:
+        print(f"Error generando lista final de atributos para ID: {game_id}")    
 
 # Genera diccionario de juegos con atributos a partir de las reseñas
-def generate_attributes(model, max_workers=1):
-    games = load_clean_metadata()
+def generate_attributes(model):
     reviews_dict = load_clean_reviews()
+    attributes = load_attributes()
 
-    names = [] 
-    reviews = []
-    for game_id in list(reviews_dict.keys())[:10]:
-        names.append(games[game_id]['name'])
-        reviews.append(reviews_dict[game_id])
+    pending_games = list(set(reviews_dict.keys()).difference(attributes.keys()))
+    print("Total de juegos con reseñas:", len(reviews_dict))
+    print("Total de juegos con atributos:", len(attributes))
+    print("Juegos pendientes:", len(pending_games))
 
-    system_prompt = read_prompt("attributes_system.txt")
-    user_prompt = read_prompt("attributes_user.txt")
+    total = len(pending_games)
+    reviews = [reviews_dict[game_id] for game_id in pending_games]
 
-    task = partial(
-        generate_game_attributes,
-        model=model,
-        system_prompt=system_prompt, 
-        user_prompt=user_prompt
-    )
+    attr_system = read_prompt("attributes_system.txt")
+    attr_user = read_prompt("attributes_user.txt")
+    agg_system = read_prompt("aggregator_system.txt")
+    agg_user = read_prompt("aggregator_user.txt")
 
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        results = list(executor.map(task, names, reviews))
+    for i, game_id in enumerate(pending_games, 1):
+        reviews = reviews_dict[game_id]
+        
+        result = generate_game_attributes(
+            game_id, 
+            reviews,
+            model=model,
+            attr_system=attr_system,
+            attr_user=attr_user,
+            agg_system=agg_system,
+            agg_user=agg_user
+        )
+        
+        if result is not None:
+            attributes[game_id] = result
 
-    attributes_dict = {}
-    for game_id, result in zip(list(games.keys()), results):
-        if result is None: continue
-        attributes_dict[game_id] = result
+        p = (i / total) * 100
+        print(f"[{i}/{total}] | {p:.2f}% completado | Finalizado: {game_id}")
 
-    save_to_json(DATA_FOLDER / "attributes.json", attributes_dict)
-    return results
+        if i % 5 == 0: # Guardar cada 5 juegos
+            print("Guardando...")
+            save_to_json(DATA_FOLDER / "attributes.json", attributes)
 
 # Carga diccionario de juegos con sus atributos
 def load_attributes():
-    return load_from_json(DATA_FOLDER / "attributes.json")
+    attributes = load_from_json(DATA_FOLDER / "attributes.json")
+    if attributes is None:
+        attributes = {}
+    return attributes
