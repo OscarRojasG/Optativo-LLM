@@ -3,6 +3,8 @@ from data.reviews import load_clean_reviews
 from prompts import get_json_response, read_prompt
 from app.settings import DATA_FOLDER
 from app.utils import save_to_json, load_from_json
+from functools import partial
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 def get_games(with_reviews: bool):
     games = load_clean_metadata()
@@ -55,7 +57,7 @@ def generate_game_attributes(game_id, reviews, model, attr_system, attr_user, ag
         print(f"Error generando lista final de atributos para ID: {game_id}")    
 
 # Genera diccionario de juegos con atributos a partir de las reseñas
-def generate_attributes(model):
+def generate_attributes(model, max_workers=None):
     reviews_dict = load_clean_reviews()
     attributes = load_attributes()
 
@@ -72,28 +74,31 @@ def generate_attributes(model):
     agg_system = read_prompt("aggregator_system.txt")
     agg_user = read_prompt("aggregator_user.txt")
 
-    for i, game_id in enumerate(pending_games, 1):
-        reviews = reviews_dict[game_id]
-        
-        result = generate_game_attributes(
-            game_id, 
-            reviews,
-            model=model,
-            attr_system=attr_system,
-            attr_user=attr_user,
-            agg_system=agg_system,
-            agg_user=agg_user
-        )
-        
-        if result is not None:
-            attributes[game_id] = result
+    task = partial(
+        generate_game_attributes,
+        model=model,
+        attr_system=attr_system,
+        attr_user=attr_user,
+        agg_system=agg_system,
+        agg_user=agg_user
+    )
 
-        p = (i / total) * 100
-        print(f"[{i}/{total}] | {p:.2f}% completado | Finalizado: {game_id}")
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {executor.submit(task, gid, rev): gid for gid, rev in zip(pending_games, reviews)}
 
-        if i % 5 == 0: # Guardar cada 5 juegos
-            print("Guardando...")
-            save_to_json(DATA_FOLDER / "attributes.json", attributes)
+        for i, future in enumerate(as_completed(futures), 1):
+            game_id = futures[future]
+            
+            result = future.result()
+            if result is not None:
+                attributes[game_id] = result
+
+            p = (i / total) * 100
+            print(f"[{i}/{total}] | {p:.2f}% completado | Finalizado: {game_id}")
+
+            if i % 5 == 0: # Guardar cada 5 juegos
+                print("Guardando...")
+                save_to_json(DATA_FOLDER / "attributes.json", attributes)
     
     save_to_json(DATA_FOLDER / "attributes.json", attributes)
     print("✅ Finalizado.")

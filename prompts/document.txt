@@ -1,7 +1,7 @@
 # Technical Metadata
 
 Name: {name}
-Era {era},
+Era: {era},
 Genres: {genres},
 Themes: {themes},
 Perspective: {perspective},

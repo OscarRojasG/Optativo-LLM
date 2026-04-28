@@ -1,23 +1,30 @@
 import requests
 from app import utils
 from app.utils import RequestError
-from app.settings import IGDB_CLIENT_ID, IGDB_TOKEN, RAW_METADATA_FILEPATH, CLEAN_METADATA_FILEPATH
+from app.settings import get_igdb_token, RAW_METADATA_FILEPATH, CLEAN_METADATA_FILEPATH
 import time
 from datetime import datetime
 
-HEADERS = {
-    'Client-ID': IGDB_CLIENT_ID,
-    'Authorization': f'Bearer {IGDB_TOKEN}',
-}
+class IGDB_Credentials:
+    def __init__(self, client_id, client_secret):
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.token = get_igdb_token(client_id, client_secret)
 
-def get_games_count():
+    def headers(self):
+        return {
+            'Client-ID': self.client_id,
+            'Authorization': f'Bearer {self.token}'
+        }
+
+def get_games_count(igdb_credentials: IGDB_Credentials):
     url = "https://api.igdb.com/v4/games/count"
     query = "where game_type = 0 & summary != n & genres != n & total_rating_count >= 10;"
 
-    response = requests.post(url, headers=HEADERS, data=query)
+    response = requests.post(url, headers=igdb_credentials.headers, data=query)
     return response.json()['count']
 
-def fetch_batch(last_id):
+def fetch_batch(last_id, igdb_credentials: IGDB_Credentials):
     """Realiza una petición a IGDB pidiendo juegos con ID mayor a last_id."""
 
     query_template = """
@@ -46,7 +53,7 @@ def fetch_batch(last_id):
     query = query_template.format(last_id=last_id)
     
     try:
-        response = requests.post("https://api.igdb.com/v4/games", headers=HEADERS, data=query)
+        response = requests.post("https://api.igdb.com/v4/games", headers=igdb_credentials.headers, data=query)
         response.raise_for_status()
         return response.json()
     except Exception:
@@ -65,7 +72,7 @@ def save_clean_metadata(data):
 def load_clean_metadata():
     return utils.load_from_json(CLEAN_METADATA_FILEPATH)
 
-def download_metadata():
+def download_metadata(igdb_credentials: IGDB_Credentials):
     """Lee el archivo de metadata y continúa desde el último ID."""
     all_games = load_raw_metadata()
     
@@ -75,12 +82,12 @@ def download_metadata():
         # Buscamos el ID más alto en la lista
         last_id = max(game['id'] for game in all_games)
     
-    download_loop(all_games, last_id)
+    download_loop(all_games, last_id, igdb_credentials)
 
-def download_loop(game_list, last_id=0):
+def download_loop(game_list, last_id, igdb_credentials: IGDB_Credentials):
     """Bucle principal de descarga con guardado preventivo."""
     while True:
-        batch = fetch_batch(last_id)
+        batch = fetch_batch(last_id, igdb_credentials)
         
         if batch is None: # Error de conexión, paramos pero guardamos lo que tenemos
             print("🛑 Error detectado. Guardando progreso y saliendo...")
