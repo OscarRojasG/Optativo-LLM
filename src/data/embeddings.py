@@ -43,9 +43,12 @@ def generate_embeddings(model, documents):
     )
 
 def similarity_search(model, query, k):
-    store = Chroma(persist_directory=CHROMADB_FOLDER, embedding_function=model)
+    store = Chroma(persist_directory=CHROMADB_FOLDER, embedding_function=model, collection_metadata={"hnsw:space": "cosine"})
     results = store.similarity_search_with_relevance_scores(query, k=k)
     return results
+
+def most_similar_game(model, query):
+    return similarity_search(model, query, 1)[0]
 
 def generate_tfidf_matrix(documents):
     vectorizer = TfidfVectorizer(stop_words='english')
