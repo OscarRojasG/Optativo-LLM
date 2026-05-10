@@ -5,6 +5,8 @@ from langchain_chroma.vectorstores import Chroma
 from app.settings import CHROMADB_FOLDER
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from app.utils import save_to_json, load_from_json
+from app.settings import DATA_FOLDER
 
 def format_prompt(prompt, metadata, attributes):
     attributes_str = '\n'.join(attributes)
@@ -25,12 +27,13 @@ def generate_documents():
         document = prompt.format(attributes=attributes_str, **metadata)
         documents.append(document)
 
-    return documents
+    save_to_json(DATA_FOLDER / "documents.json", documents)
+
+def load_documents():
+    return load_from_json(DATA_FOLDER / "documents.json")
 
 # Genera embeddings combinando metadata + atributos
-def generate_embeddings(model):
-    documents = generate_documents()
-
+def generate_embeddings(model, documents):
     # Guardar los embeddings
     Chroma.from_texts(
         texts=documents, 
