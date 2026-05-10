@@ -38,7 +38,8 @@ def generate_embeddings(model, documents):
     Chroma.from_texts(
         texts=documents, 
         embedding=model, 
-        persist_directory=CHROMADB_FOLDER
+        persist_directory=CHROMADB_FOLDER,
+        collection_metadata={"hnsw:space": "cosine"}
     )
 
 def similarity_search(model, query, k):
