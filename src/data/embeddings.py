@@ -12,20 +12,26 @@ def format_prompt(prompt, metadata, attributes):
     attributes_str = '\n'.join(attributes)
     return prompt.format(attributes=attributes_str, **metadata)
 
+def build_document(metadata: dict, attributes: list[str]) -> str:
+    attrs = ", ".join(attributes)
+    return (
+        f"{metadata['summary']} "
+        f"{metadata['name']} is a {metadata['genres']} game from the {metadata['era']} era. "
+        f"It features {metadata['themes'].lower()} themes, played from a {metadata['perspective'].lower()} perspective. "
+        f"Challenge level: {metadata['challenge_level']}. "
+        f"Key attributes: {attrs}."
+    )
+
 def generate_documents():
     all_metadata = load_clean_metadata()
     all_attributes = load_attributes()
 
-    prompt = read_prompt("document.txt")
     documents = []
 
     for game in all_attributes:
         metadata = all_metadata[game]
         attributes = all_attributes[game]
-
-        attributes_str = '\n'.join(attributes)
-        document = prompt.format(attributes=attributes_str, **metadata)
-        documents.append(document)
+        documents.append(build_document(metadata, attributes))
 
     save_to_json(DATA_FOLDER / "documents.json", documents)
 
