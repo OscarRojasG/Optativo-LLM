@@ -1,10 +1,11 @@
 from data.metadata import load_clean_metadata
 from data.attributes import load_attributes
-from prompts import read_prompt
 from langchain_chroma.vectorstores import Chroma
 from app.settings import CHROMADB_FOLDER
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from app.utils import load_from_json
+from app.settings import DATA_FOLDER
 
 def format_prompt(prompt, metadata, attributes):
     attributes_str = '\n'.join(attributes)
@@ -59,3 +60,6 @@ def lexical_search(documents, tfidf_matrix, vectorizer, query, k):
     cosine_similarities = cosine_similarity(query_vector, tfidf_matrix).flatten()
     related_docs_indices = cosine_similarities.argsort()[:-k-1:-1]
     return [documents[index] for index in related_docs_indices]
+
+def load_documents():
+    return load_from_json(DATA_FOLDER / "documents.json")
