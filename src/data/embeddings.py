@@ -18,7 +18,7 @@ def build_document(metadata: dict, attributes: list[str]) -> str:
         f"{metadata['name']} is a {metadata['genres']} game from the {metadata['era']} era. "
         f"It features {metadata['themes'].lower()} themes, played from a {metadata['perspective'].lower()} perspective. "
         f"Challenge level: {metadata['challenge_level']}. "
-        f"Key attributes: {attrs}."
+        f"Key attributes: {attrs if attrs else 'None'}."
     )
 
 def generate_documents():
@@ -26,22 +26,25 @@ def generate_documents():
     all_attributes = load_attributes()
 
     documents = []
+    metadatas = []
 
-    for game in all_attributes:
+    for game in all_metadata:
         metadata = all_metadata[game]
-        attributes = all_attributes[game]
+        attributes = all_attributes[game] if game in all_attributes else []
+        
         documents.append(build_document(metadata, attributes))
+        metadatas.append(all_metadata[game]) 
 
-    return documents
+    return documents, metadatas
 
-# Genera embeddings combinando metadata + atributos
 def generate_embeddings(model):
-    documents = generate_documents()
+    documents, metadatas = generate_documents() # Recibimos ambas
 
-    # Guardar los embeddings
+    # Guardamos los embeddings CON sus metadatos
     Chroma.from_texts(
         texts=documents, 
         embedding=model, 
+        metadatas=metadatas,
         persist_directory=CHROMADB_FOLDER
     )
 
